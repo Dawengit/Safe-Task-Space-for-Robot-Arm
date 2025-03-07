@@ -13,6 +13,10 @@ This ROS2 node provides real-time safety zone monitoring for robotic arms using 
 - 🚨 Safety boundary violation detection
 - 📊 RViz visualization (Safety zone & markers)
 
+## System Overview
+
+
+
 ## Dependencies
 - **ROS2 Humble**
 - OpenCV 4.x
@@ -77,6 +81,7 @@ This ROS2 node provides real-time safety zone monitoring for robotic arms using 
 - Verify transformation chain:
     ```bash
       ros2 run tf2_ros tf2_echo base_link camera_frame
+      
 ## Usage
 - launch the system
   ```bash
@@ -95,13 +100,15 @@ This ROS2 node provides real-time safety zone monitoring for robotic arms using 
 
     1. Maintain visibility of at least 4 AprilTags
 
-    2. Recommended tag arrangement: Rectangular pattern
+    2. Recommended tag arrangement: Rectangular Pattern
 
-    3. Optimal working distance: 0.5-2 meters from camera
+    3. Optimal working distance: 0.5-1.5 meters from camera(For laser cutting 3.5cm)
 
 
 ## Reference📌
 AprilTag:  
+
 https://github.com/AprilRobotics/apriltag
+
 https://github.com/StanleyChueh/AprilTag_Detection/tree/master
 

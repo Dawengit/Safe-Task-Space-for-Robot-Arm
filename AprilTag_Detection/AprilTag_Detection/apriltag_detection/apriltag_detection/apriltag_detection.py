@@ -20,6 +20,14 @@ class AprilTagSafetyZone(Node):
     def __init__(self):
         super().__init__('april_tag_safety_zone')
         self.bridge = CvBridge()
+        # ---------------------------------------------------
+        # self.end_effector_sub = self.create_subscription(
+        #     PoseStamped,
+        #     'tool_pose',
+        #     self.handle_end_effector_pose,
+        #     10)
+
+        # # ---------------------------------------------------
         
         # initialize the camera
         # self.cap = cv2.VideoCapture(0)
@@ -38,6 +46,7 @@ class AprilTagSafetyZone(Node):
         # ---------------------------------------------------
         # C920 camera parameters （C922 pro webcam）
         # After calibration, the camera parameters are as follows
+        # self.tagsize = 0.035  # Tag actual size (m)
         self.tagsize = 0.035  # Tag actual size (m)
         self.image_width = 1280  # Recommended to use the native resolution
         self.image_height = 720
@@ -66,6 +75,8 @@ class AprilTagSafetyZone(Node):
         
         # timer for camera callback(30HZ)
         self.timer = self.create_timer(1/30.0, self.camera_callback)
+
+    # ---------------------------------------------------
 
     def camera_callback(self):
         # Read camera frame
@@ -229,14 +240,15 @@ class AprilTagSafetyZone(Node):
         marker.type = Marker.CUBE
         marker.action = Marker.ADD
         
+        # set the pose
         marker.pose.position.x = center[0]
         marker.pose.position.y = center[1]
         marker.pose.position.z = center[2]
         marker.pose.orientation.w = 1.0
         
-        marker.scale.x = dimensions[0]  # x-axis length
-        marker.scale.y = dimensions[1]  # y-axis width
-        marker.scale.z = dimensions[2]  # z-axis height
+        marker.scale.x = dimensions[0]  # x axis length
+        marker.scale.y = dimensions[1]  # y axis width
+        marker.scale.z = dimensions[2]  # z axis height
         
         marker.color.a = 0.3
         marker.color.r = 0.0

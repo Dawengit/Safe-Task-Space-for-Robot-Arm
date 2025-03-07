@@ -62,6 +62,19 @@ Visualization Manager:
       Update Interval: 0
 
     
+    # End Effector marker
+
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: End Effector
+      Topic: /safety_visualization  # 新添加的Marker话题
+      Namespaces:
+        end_effector: true
+        coordinates: true
+      Marker Scale: 1.5
+
+
+    
     # remove the following displays
     # - Class: rviz_default_plugins/Map (removed)
     # - Class: rviz_default_plugins/Odometry (removed)
@@ -91,7 +104,4 @@ Window Geometry:
   Width: 1848
   X: 72
   Y: 27
-
-
-
 

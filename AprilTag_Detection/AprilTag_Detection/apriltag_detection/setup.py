@@ -34,6 +34,7 @@ setup(
             # AprilTag detection node
             'apriltag_detection= apriltag_detection.apriltag_detection:main',
             # safety controller node
+            "UR5_safety_simulator = apriltag_detection.UR5_safety_simulator:main",
             # 'arm_safety_controller = apriltag_detection.arm_safety_controller:main',
             # if you have more nodes, you can add them here
         ],
