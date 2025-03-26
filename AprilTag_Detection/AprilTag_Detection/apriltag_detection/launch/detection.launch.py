@@ -26,19 +26,19 @@ def generate_launch_description():
             }]
         ),
 
-        Node(
-            package='apriltag_detection',
-            executable='UR5_safety_simulator',
-            name='safety_simulator',
-            parameters=[{
-                'simulation_rate': 30.0,
-                'safety_check_rate': 10.0,
-                'initial_position': [0.5, 0.0, 0.7],
-                'movement_range': 0.5,
-                'safety_margin': 0.1
-            }],
-            output='screen'
-        ),
+        # Node(
+        #     package='apriltag_detection',
+        #     executable='UR5_safety_simulator',
+        #     name='safety_simulator',
+        #     parameters=[{
+        #         'simulation_rate': 30.0,
+        #         'safety_check_rate': 10.0,
+        #         'initial_position': [0.5, 0.0, 0.7],
+        #         'movement_range': 0.5,
+        #         'safety_margin': 0.1
+        #     }],
+        #     output='screen'
+        # ),
 
         Node(
             package='tf2_ros',
@@ -46,7 +46,7 @@ def generate_launch_description():
             arguments=[
                 '0.0', '0.0', '0.0',  # X/Y/Z translation
                 '0', '0', '0',        # roll/pitch/yaw
-                'ur5_base_link',      # father frame
+                'panda_link0',      # father frame
                 'camera_frame'        # son frame
             ],
             name='camera_tf_publisher'
