@@ -46,7 +46,7 @@ def generate_launch_description():
             arguments=[
                 '0.0', '0.0', '0.0',  # X/Y/Z translation
                 '0', '0', '0',        # roll/pitch/yaw
-                'panda_link0',      # father frame
+                'ur5e_base',      # father frame
                 'camera_frame'        # son frame
             ],
             name='camera_tf_publisher'

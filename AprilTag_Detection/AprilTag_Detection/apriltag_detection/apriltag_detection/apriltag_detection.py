@@ -9,14 +9,7 @@ from cv_bridge import CvBridge
 import apriltag
 import tf2_ros
 import tf2_geometry_msgs
-import tf_transformations
-
-# Class AprilTagSafetyZone
-"""This is the main class for the AprilTag safety zone node. 
-It is responsible for detecting AprilTags in the camera feed, calculating their positions, 
-and publishing the safety zone as a visualization marker(task space).
-"""
-
+import transforms3d.quaternions  # Replacement for tf_transformations
 
 class AprilTagSafetyZone(Node):
     def __init__(self):
@@ -24,7 +17,7 @@ class AprilTagSafetyZone(Node):
         self.bridge = CvBridge()
         
         # Initialize camera
-        self.cap = cv2.VideoCapture(2)
+        self.cap = cv2.VideoCapture(0)
         if not self.cap.isOpened():
             self.get_logger().error("Cannot open camera")
             exit()
@@ -61,9 +54,8 @@ class AprilTagSafetyZone(Node):
         self.timer = self.create_timer(1/30.0, self.camera_callback)
         
         # Timer for checking finger position (10Hz)
-        self.check_timer = self.create_timer(0.1, self.check_end_effector_position )
+        self.check_timer = self.create_timer(0.1, self.check_end_effector_position)
 
-#----------------------------------------------------
     def camera_callback(self):
         ret, frame = self.cap.read()
         if not ret:
@@ -115,7 +107,6 @@ class AprilTagSafetyZone(Node):
                 self.tag_positions[tag_id] = tvec.flatten()
                 self.publish_tf_transform(tag_id, rvec, tvec)
 
-
         # Remove undetected tags
         for tag_id in list(self.tag_positions.keys()):
             if tag_id not in current_tags:
@@ -126,11 +117,12 @@ class AprilTagSafetyZone(Node):
         cv2.imshow('AprilTag Detection', frame)
         cv2.waitKey(1)
 
-#----------------------------------------------------
     def publish_tf_transform(self, tag_id, rvec, tvec):
         rotation_matrix = np.eye(4)
         rotation_matrix[:3, :3], _ = cv2.Rodrigues(rvec)
-        quaternion = tf_transformations.quaternion_from_matrix(rotation_matrix)
+        
+        # Convert rotation matrix to quaternion using transforms3d
+        quaternion = transforms3d.quaternions.mat2quat(rotation_matrix[:3, :3])
         
         transform = TransformStamped()
         transform.header.stamp = self.get_clock().now().to_msg()
@@ -141,14 +133,14 @@ class AprilTagSafetyZone(Node):
         transform.transform.translation.y = tvec[1][0]
         transform.transform.translation.z = tvec[2][0]
         
-        transform.transform.rotation.x = quaternion[0]
-        transform.transform.rotation.y = quaternion[1]
-        transform.transform.rotation.z = quaternion[2]
-        transform.transform.rotation.w = quaternion[3]
+        # transforms3d returns [w, x, y, z], ROS uses [x, y, z, w]
+        transform.transform.rotation.x = quaternion[1]
+        transform.transform.rotation.y = quaternion[2]
+        transform.transform.rotation.z = quaternion[3]
+        transform.transform.rotation.w = quaternion[0]
         
         self.tf_broadcaster.sendTransform(transform)
 
-#----------------------------------------------------
     def update_safety_zone(self):
         if len(self.tag_positions) < 4:
             self.get_logger().warn(f"Need 4 tags, detected {len(self.tag_positions)}")
@@ -217,7 +209,7 @@ class AprilTagSafetyZone(Node):
         
         self.marker_pub.publish(marker)
 
-    def check_end_effector_position (self):
+    def check_end_effector_position(self):
         """Check if endeffector is inside safety zone"""
         if self.safety_zone_min is None or self.safety_zone_max is None:
             return
@@ -226,7 +218,7 @@ class AprilTagSafetyZone(Node):
             # Lookup transform from camera_frame to finger link
             transform = self.tf_buffer.lookup_transform(
                 "camera_frame",  # webcam frame
-                "panda_rightfinger",  # Change to correct endeffector if needed
+                "robotiq_85_right_finger_tip_link",  # Change to correct endeffector if needed
                 rclpy.time.Time())
             
             # Get finger position in camera frame
@@ -240,9 +232,9 @@ class AprilTagSafetyZone(Node):
             inside = np.all(finger_pos >= self.safety_zone_min) and np.all(finger_pos <= self.safety_zone_max)
             
             if inside:
-                self.get_logger().info("endeffector is INSIDE safety zone", throttle_duration_sec=1.0)
+                self.get_logger().info("End effector is INSIDE safety zone", throttle_duration_sec=1.0)
             else:
-                self.get_logger().warn("Attention!endeffector is OUTSIDE safety zone!!!!", throttle_duration_sec=2.0)
+                self.get_logger().warn("Attention! End effector is OUTSIDE safety zone!!!!", throttle_duration_sec=2.0)
            
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
             self.get_logger().error(f"TF error: {str(e)}")
