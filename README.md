@@ -1,6 +1,6 @@
 # AprilTag Safety Zone Monitoring System
 
-![System Architecture](system_overview.png) <!-- Replace with actual diagram -->
+
 
 ## Overview
 This ROS2 node provides real-time safety zone monitoring for robotic arms using AprilTag detection. It dynamically calculates a 3D safety zone based on detected AprilTags and verifies if the robot's end-effector stays within defined boundaries.
@@ -15,7 +15,7 @@ This ROS2 node provides real-time safety zone monitoring for robotic arms using 
 
 ## System Overview
 
-
+![System Architecture](system.png)
 
 ## Dependencies
 - **ROS2 Humble**
@@ -39,35 +39,36 @@ This ROS2 node provides real-time safety zone monitoring for robotic arms using 
   
 
 ## Camera Setup
-- calibration
+- Camera Parameters(config/camera_params.yaml)
   ```bash
-  ros2 run camera_calibration cameracalibrator \
-    --size 8x6 \
-    --square 0.024 \
-    image:=/camera_image
-- configuration  
+  camera:
+    index: 2                # USB camera index
+    resolution: [1280, 720] # WxH
+    matrix:                 # Intrinsic parameters (pixel)
+      fx: 1200              # Focal Length()
+      fy: 1195
 
-  Update config/camera_params.yaml with calibration results:
-  ```bash
-  camera_matrix: [1200, 0, 640.5, 0, 1195, 360.5, 0, 0, 1]
-  distortion_coefficients: [0.12, -0.25, 0.001, 0.003, 0.15]
-  tagsize: 0.035  # Actual tag size in meters
+      cx: 640.5             # Principal Point
+      cy: 360.5
+    distortion: [0.12, -0.25, 0.001, 0.003, 0.15]
+
+  apriltag:
+    size: 0.035            # Tag side length (meters)
+    family: "tag36h11"     # Tag family
+    ids: [0, 1, 2, 3]      # Target tag IDs
+
+  safety:
+    xy_margin: 0.1         # Expansion margin in XY plane
+    z_margin: 0.5          # Z-axis safety margin
+
 
 ## Robot integartion
-- End-Effector Tracking  
-
-  Implement in robot controller:
+- End-Effector Tracking
   ```bash
-  class ArmController(Node):
-    def __init__(self):
-        self.pose_pub = self.create_publisher(PoseStamped, '/endeffector_pose', 10)
-    
-    def publish_pose(self):
-        pose = PoseStamped()
-        pose.header.frame_id = "base_link"
-        pose.pose = self.get_actual_position()  # Implement robot API call
-        self.pose_pub.publish(pose)
+  1.Change the name of the robot link in the function end_effector_detector  
+  2.Change the static frame parameter in order to calculate the transform coordinate for the system
 
+  
 - Coordinate Transformation  
 
   The node handles TF transformations between:
