@@ -18,13 +18,13 @@ This ROS2 node provides real-time safety zone monitoring for robotic arms using 
 ![System Architecture](system.png)
 
 ## Dependencies
-- **ROS2 Humble**
+- **ROS2 iron**
 - OpenCV 4.x
 - Python packages:
   ```bash
-  pip install apriltag numpy
-  sudo apt install ros-humble-vision-opencv ros-humble-tf2-ros \
-  ros-humble-geometry-msgs ros-humble-camera-calibration
+  pip3 install apriltag 
+  pip3 install transforms3d
+
 
 ## installation
 - install
@@ -61,24 +61,40 @@ This ROS2 node provides real-time safety zone monitoring for robotic arms using 
     xy_margin: 0.1         # Expansion margin in XY plane
     z_margin: 0.5          # Z-axis safety margin
 
+- camera calibration
+
+  if you use a different camera, you may need to do camera calibration to get the intrinsic value, please refer to this link to continue: https://docs.nav2.org/tutorials/docs/camera_calibration.html
+
+
 
 ## Robot integartion
 - End-Effector Tracking
   ```bash
   1.Change the name of the robot link in the function end_effector_detector  
-  2.Change the static frame parameter in order to calculate the transform coordinate for the system
+  try:
+            # Lookup transform from camera_frame to finger link
+            transform = self.tf_buffer.lookup_transform(
+                "camera_frame",  # webcam frame
+                "robotiq_85_right_finger_tip_link",  # Change to correct endeffector if needed
+                rclpy.time.Time())
+  
 
   
-- Coordinate Transformation  
-
-  The node handles TF transformations between:
-
-    - Robot base frame (base_link)
-
-    - Camera frame (camera_frame)
-
-    - AprilTag frames (tag_0, tag_1, etc.)
-
+- Coordinate Transformation 
+  ```bash
+  2. Change the translation value here to real world setup value
+   Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            arguments=[
+                '0.0', '0.0', '0.0',  # X/Y/Z translation
+                '0', '0', '0',        # roll/pitch/yaw
+                'ur5e_base',      # father frame
+                'camera_frame'        # son frame
+            ],
+            name='camera_tf_publisher'
+        ),
+  
 - Verify transformation chain:
     ```bash
       ros2 run tf2_ros tf2_echo base_link camera_frame
@@ -89,7 +105,7 @@ This ROS2 node provides real-time safety zone monitoring for robotic arms using 
   ros2 launch apriltag_detection detection.launch.py 
 - RViz Monitoring
 
-  Add these displays:
+  Adjust these displays:
 
     1. Image: Topic /camera_image
 
@@ -103,7 +119,7 @@ This ROS2 node provides real-time safety zone monitoring for robotic arms using 
 
     2. Recommended tag arrangement: Rectangular Pattern
 
-    3. Optimal working distance: 0.5-1.5 meters from camera(For laser cutting 3.5cm)
+    3. Optimal working distance: 0.5-1.5 meters from camera(For laser cutting 3.5cm) You may adapt to different size tag to get longer working distance.
 
 
 ## Reference📌
