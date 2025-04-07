@@ -41,7 +41,7 @@ This ROS2 node provides real-time safety zone monitoring for robotic arms using 
 ## Camera Setup
 - Camera Parameters(config/camera_params.yaml)
 
-  For the program to compute the actual distance, you need to get the camera intrinsic parameter(Focal length and Principal point) and apply to the program:
+  For the purpose to compute the actual distance correctly, you need to get the camera intrinsic parameter(Focal length and Principal point) and apply to the program:
   ```bash
   camera:
     index: 2                # USB camera index
@@ -72,7 +72,7 @@ This ROS2 node provides real-time safety zone monitoring for robotic arms using 
 ## Robot integartion
 - End-Effector Tracking
   
-  Change the name of the robot link in the function end_effector_detector  
+  Change the name of the robot link in the function end_effector_detector.  
   ```bash
   try:
             # Lookup transform from camera_frame to finger link
@@ -85,7 +85,7 @@ This ROS2 node provides real-time safety zone monitoring for robotic arms using 
   
 - Coordinate Transformation 
 
-  Change the translation value here to real world setup value
+  Change the translation value here to real world setup value.
   ```bash
    Node(
             package='tf2_ros',
